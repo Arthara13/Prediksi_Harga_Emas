@@ -25,38 +25,32 @@ SEED = 42
 os.environ["PYTHONHASHSEED"] = str(SEED)
 np.random.seed(SEED); random.seed(SEED); tf.random.set_seed(SEED)
 
-def styled_table(headers, rows, icons=None, max_height=380):
-    """Render a styled dark HTML table. headers: list of str, rows: list of list of (value, color_or_None)"""
-    icon_row = ""
-    if icons:
-        icon_row = "<tr style='background:#0d0f14;border-bottom:1px solid #252e44;'>" +             "".join(f"<td style='padding:4px 12px;text-align:center;font-size:1.1rem;'>{ic}</td>" for ic in icons) + "</tr>"
-    head_cells = "".join(
-        f"<th style='padding:10px 12px;text-align:{"left" if i==0 else "right"};color:#f0c050;"
-        f"font-family:JetBrains Mono,monospace;font-size:0.68rem;letter-spacing:0.1em;"
-        f"text-transform:uppercase;white-space:nowrap;'>{h}</th>"
-        for i, h in enumerate(headers)
-    )
+def styled_table(headers, rows, max_height=380):
+    """Render styled dark HTML table. rows: list of list of (value, color) or plain value."""
+    TH_BASE = "padding:10px 12px;font-family:JetBrains Mono,monospace;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;color:#f0c050;background:#161b27;"
+    head_cells = ""
+    for i, h in enumerate(headers):
+        align = "left" if i == 0 else "right"
+        head_cells += "<th style='" + TH_BASE + "text-align:" + align + ";'>" + str(h) + "</th>"
     body = ""
     for row in rows:
         cells = ""
         for i, cell in enumerate(row):
-            if isinstance(cell, tuple):
-                val, color = cell
-            else:
-                val, color = cell, "#e8edf8"
+            val, color = cell if isinstance(cell, tuple) else (cell, "#e8edf8")
             align = "left" if i == 0 else "right"
-            cells += f"<td style='padding:8px 12px;text-align:{align};color:{color};"                      f"font-family:JetBrains Mono,monospace;font-size:0.78rem;"                      f"white-space:nowrap;'>{val}</td>"
-        body += f"<tr style='border-bottom:1px solid #1d2335;'>{cells}</tr>"
-    return f"""
-    <div style="border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:{max_height}px;margin-bottom:10px;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead style="position:sticky;top:0;z-index:2;">
-          <tr style="background:#161b27;border-bottom:2px solid #252e44;">{head_cells}</tr>
-          {icon_row}
-        </thead>
-        <tbody style="background:#0d0f14;">{body}</tbody>
-      </table>
-    </div>"""
+            TD = "padding:8px 12px;font-family:JetBrains Mono,monospace;font-size:0.78rem;white-space:nowrap;"
+            cells += "<td style='" + TD + "text-align:" + align + ";color:" + color + ";'>" + str(val) + "</td>"
+        body += "<tr style='border-bottom:1px solid #1d2335;'>" + cells + "</tr>"
+    html = (
+        "<div style='border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:" + str(max_height) + "px;margin-bottom:10px;'>"
+        "<table style='width:100%;border-collapse:collapse;'>"
+        "<thead style='position:sticky;top:0;z-index:2;'>"
+        "<tr>" + head_cells + "</tr>"
+        "</thead>"
+        "<tbody style='background:#0d0f14;'>" + body + "</tbody>"
+        "</table></div>"
+    )
+    return html
 
 # ─── Design Tokens — AURUM palette ────────────────────────────────────────
 BG        = "#07080b"
@@ -921,15 +915,15 @@ with tab1:
             r = desc.loc[var]
             icon = COMMODITY_ICONS2.get(var, "📊")
             stat_rows.append([
-                (f"{icon} {var}", "#fde99a"),
-                (f"{int(r['N'])}", "#7a8aaa"),
-                (f"{r['Mean']:,.2f}", "#e8edf8"),
-                (f"{r['Std']:,.2f}", "#c0cfe0"),
-                (f"{r['Min']:,.2f}", "#f05060"),
-                (f"{r['Q1']:,.2f}", "#7a8aaa"),
-                (f"{r['Median']:,.2f}", "#f0c050"),
-                (f"{r['Q3']:,.2f}", "#7a8aaa"),
-                (f"{r['Max']:,.2f}", "#2ec99a"),
+                (icon + " " + var, "#fde99a"),
+                (str(int(r["N"])), "#7a8aaa"),
+                ("%.2f" % r["Mean"], "#e8edf8"),
+                ("%.2f" % r["Std"], "#c0cfe0"),
+                ("%.2f" % r["Min"], "#f05060"),
+                ("%.2f" % r["Q1"], "#7a8aaa"),
+                ("%.2f" % r["Median"], "#f0c050"),
+                ("%.2f" % r["Q3"], "#7a8aaa"),
+                ("%.2f" % r["Max"], "#2ec99a"),
             ])
         st.markdown(styled_table(
             ["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"],
@@ -961,21 +955,21 @@ with tab1:
         corr_rows = []
         for var, rv in zip(corr.index, corr.values):
             rv_r = round(rv, 3)
-            bar_len = int(abs(rv_r) * 14)
-            bar_fill = "█" * bar_len + "░" * (14 - bar_len)
+            bar_len = int(abs(rv_r) * 12)
+            bar_fill = "█" * bar_len + "░" * (12 - bar_len)
             bar_color = "#2ec99a" if rv_r >= 0 else "#f05060"
-            strength = ("🟢 Kuat" if abs(rv_r)>=0.6 else "🟡 Sedang" if abs(rv_r)>=0.3 else "🔴 Lemah")
+            strength = "🟢 Kuat" if abs(rv_r)>=0.6 else ("🟡 Sedang" if abs(rv_r)>=0.3 else "🔴 Lemah")
             arah = "↑ Positif" if rv_r >= 0 else "↓ Negatif"
             icon = COMMODITY_ICONS.get(var, "📊")
             corr_rows.append([
-                (f"{icon} {var}", "#fde99a"),
-                (f"{rv_r:+.3f}", bar_color),
-                (f"<span style='font-size:0.65rem;letter-spacing:-1px;color:{bar_color};'>{bar_fill}</span>", bar_color),
+                (icon + " " + var, "#fde99a"),
+                (("%+.3f" % rv_r), bar_color),
+                (bar_fill, bar_color),
                 (strength, "#e8edf8"),
                 (arah, bar_color),
             ])
         st.markdown(styled_table(
-            ["Variabel","r","Visual","Kekuatan","Arah"],
+            ["Variabel", "r", "Visual", "Kekuatan", "Arah"],
             corr_rows, max_height=280
         ), unsafe_allow_html=True)
 
@@ -1150,7 +1144,7 @@ def render_model_tab(key, color_model, badge_html):
         df_t=pd.DataFrame({
             "Tanggal":d_t.values,
             "Aktual (USD)":y_a.round(2),
-            f"Prediksi {key}":y_p.round(2),
+            "Prediksi":y_p.round(2),
             "Error Absolut":err.round(2),
             "Error (%)": (err/y_a*100).round(3),
         })
@@ -1158,23 +1152,23 @@ def render_model_tab(key, color_model, badge_html):
         detail_rows = []
         for i in range(len(df_t)):
             ep = ep_vals[i]
-            ep_color = "#2ec99a" if ep < 1 else "#f0c050" if ep < 3 else "#f05060"
-            acc_icon = "🟢" if ep < 1 else "🟡" if ep < 3 else "🔴"
+            ep_color = "#2ec99a" if ep < 1 else ("#f0c050" if ep < 3 else "#f05060")
+            acc_icon = "🟢" if ep < 1 else ("🟡" if ep < 3 else "🔴")
             detail_rows.append([
                 (str(df_t["Tanggal"].iloc[i])[:10], "#7a8aaa"),
-                (f"${y_a[i]:,.2f}", "#fde99a"),
-                (f"${y_p[i]:,.2f}", color_model),
-                (f"${err[i]:,.2f}", ep_color),
-                (f"{ep:.3f}%", ep_color),
+                ("$%.2f" % y_a[i], "#fde99a"),
+                ("$%.2f" % y_p[i], color_model),
+                ("$%.2f" % err[i], ep_color),
+                ("%.3f%%" % ep, ep_color),
                 (acc_icon, ep_color),
             ])
         st.markdown(styled_table(
             ["📅 Tanggal","🥇 Aktual","🎯 Prediksi","Err Abs","Err %","Akurasi"],
             detail_rows, max_height=380
         ), unsafe_allow_html=True)
-        st.download_button(f"⬇️ Download CSV — {key}",
+        st.download_button("⬇️ Download CSV — " + key,
                            data=df_t.to_csv(index=False).encode(),
-                           file_name=f"prediksi_{key.lower().replace('-','_')}.csv",
+                           file_name="prediksi_" + key.lower().replace("-","_") + ".csv",
                            mime="text/csv")
 
 # ── TAB 2 & 3 ─────────────────────────────────────────────────────────────
@@ -1215,17 +1209,17 @@ with tab4:
             lv = lm[mk]; gv = gm[mk]
             hi = mk in higher_better
             lstm_win = (lv <= gv and not hi) or (lv >= gv and hi)
-            lc = "#f05060" if lstm_win else "#f0506066"
-            gc = "#2ec99a" if not lstm_win else "#2ec99a66"
+            lc = "#f05060" if lstm_win else "#7a8aaa"
+            gc = "#2ec99a" if not lstm_win else "#7a8aaa"
             delta = abs(lv - gv)
             winner = ("🔴 BI-LSTM" if lstm_win else "🟢 BI-GRU")
             winner_c = "#f05060" if lstm_win else "#2ec99a"
             icon = METRIC_ICONS.get(mk, "📊")
             cmp_rows.append([
-                (f"{icon} {mk}", "#fde99a"),
-                (f"{lv:.4f} {'🏆' if lstm_win else ''}", lc),
-                (f"{gv:.4f} {'🏆' if not lstm_win else ''}", gc),
-                (f"{delta:.4f}", "#4a5570"),
+                (icon + " " + mk, "#fde99a"),
+                ("%.4f%s" % (lv, " 🏆" if lstm_win else ""), lc),
+                ("%.4f%s" % (gv, " 🏆" if not lstm_win else ""), gc),
+                ("%.4f" % delta, "#4a5570"),
                 (winner, winner_c),
             ])
         st.markdown(styled_table(
@@ -1309,17 +1303,16 @@ with tab4:
             gru_p  = results["BI-GRU"]["pred_price"].round(2)
             overlay_rows = []
             for i in range(len(y_act)):
-                act = y_act[i]
-                lp  = lstm_p[i]; gp = gru_p[i]
-                le  = abs(act-lp); ge = abs(act-gp)
+                act = y_act[i]; lp = lstm_p[i]; gp = gru_p[i]
+                le = abs(act - lp); ge = abs(act - gp)
                 lstm_win = le <= ge
                 overlay_rows.append([
                     (str(date_t.values[i])[:10], "#7a8aaa"),
-                    (f"${act:,.2f}", "#fde99a"),
-                    (f"${lp:,.2f}", "#f05060" if lstm_win else "#f0506099"),
-                    (f"${gp:,.2f}", "#2ec99a" if not lstm_win else "#2ec99a99"),
-                    (f"${le:,.2f}", "#f05060" if le>ge else "#2ec99a"),
-                    (f"${ge:,.2f}", "#f05060" if ge>le else "#2ec99a"),
+                    ("$%.2f" % act, "#fde99a"),
+                    ("$%.2f" % lp, "#f05060" if lstm_win else "#7a8aaa"),
+                    ("$%.2f" % gp, "#2ec99a" if not lstm_win else "#7a8aaa"),
+                    ("$%.2f" % le, "#f05060" if le > ge else "#2ec99a"),
+                    ("$%.2f" % ge, "#f05060" if ge > le else "#2ec99a"),
                     ("🔴 LSTM" if lstm_win else "🟢 GRU", "#f05060" if lstm_win else "#2ec99a"),
                 ])
             st.markdown(styled_table(
@@ -1451,30 +1444,30 @@ with tab5:
         col_tbl,col_dl=st.columns([3,1])
         with col_tbl:
             with st.expander("📋 Tabel Prediksi Lengkap"):
-                forecast_rows = []
                 cum = fp - last_price
+                forecast_rows = []
                 for i in range(len(fp)):
                     d_val = deltas[i]; c_val = cum[i]
                     d_color = "#2ec99a" if d_val >= 0 else "#f05060"
                     c_color = "#2ec99a" if c_val >= 0 else "#f05060"
                     trend = "📈" if d_val >= 0 else "📉"
                     forecast_rows.append([
-                        (f"{i+1}", "#4a5570"),
+                        (str(i+1), "#4a5570"),
                         (date_labels[i], "#7a8aaa"),
-                        (f"${fp[i]:,.2f}", mc),
-                        (f"{'+' if d_val>=0 else ''}${d_val:,.2f}", d_color),
-                        (f"{'+' if c_val>=0 else ''}${c_val:,.2f}", c_color),
+                        ("$%.2f" % fp[i], mc),
+                        (("%+.2f" % d_val), d_color),
+                        (("%+.2f" % c_val), c_color),
                         (trend, d_color),
                     ])
                 st.markdown(styled_table(
-                    ["#","📅 Tanggal",f"💰 Prediksi","Δ Harian","Δ Kumulatif","Tren"],
+                    ["#","📅 Tanggal","💰 Prediksi","Δ Harian","Δ Kumulatif","Tren"],
                     forecast_rows, max_height=400
                 ), unsafe_allow_html=True)
         with col_dl:
             st.download_button(
                 "⬇️ Download CSV",
                 data=df_future.to_csv(index=False).encode(),
-                file_name=f"prediksi_{model_choice.lower().replace('-','_')}_{custom_fd}hari.csv",
+                file_name="prediksi_" + model_choice.lower().replace("-","_") + "_" + str(custom_fd) + "hari.csv",
                 mime="text/csv",
                 use_container_width=True,
             )
