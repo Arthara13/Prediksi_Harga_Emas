@@ -25,6 +25,39 @@ SEED = 42
 os.environ["PYTHONHASHSEED"] = str(SEED)
 np.random.seed(SEED); random.seed(SEED); tf.random.set_seed(SEED)
 
+def styled_table(headers, rows, icons=None, max_height=380):
+    """Render a styled dark HTML table. headers: list of str, rows: list of list of (value, color_or_None)"""
+    icon_row = ""
+    if icons:
+        icon_row = "<tr style='background:#0d0f14;border-bottom:1px solid #252e44;'>" +             "".join(f"<td style='padding:4px 12px;text-align:center;font-size:1.1rem;'>{ic}</td>" for ic in icons) + "</tr>"
+    head_cells = "".join(
+        f"<th style='padding:10px 12px;text-align:{"left" if i==0 else "right"};color:#f0c050;"
+        f"font-family:JetBrains Mono,monospace;font-size:0.68rem;letter-spacing:0.1em;"
+        f"text-transform:uppercase;white-space:nowrap;'>{h}</th>"
+        for i, h in enumerate(headers)
+    )
+    body = ""
+    for row in rows:
+        cells = ""
+        for i, cell in enumerate(row):
+            if isinstance(cell, tuple):
+                val, color = cell
+            else:
+                val, color = cell, "#e8edf8"
+            align = "left" if i == 0 else "right"
+            cells += f"<td style='padding:8px 12px;text-align:{align};color:{color};"                      f"font-family:JetBrains Mono,monospace;font-size:0.78rem;"                      f"white-space:nowrap;'>{val}</td>"
+        body += f"<tr style='border-bottom:1px solid #1d2335;'>{cells}</tr>"
+    return f"""
+    <div style="border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:{max_height}px;margin-bottom:10px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="position:sticky;top:0;z-index:2;">
+          <tr style="background:#161b27;border-bottom:2px solid #252e44;">{head_cells}</tr>
+          {icon_row}
+        </thead>
+        <tbody style="background:#0d0f14;">{body}</tbody>
+      </table>
+    </div>"""
+
 # ─── Design Tokens — AURUM palette ────────────────────────────────────────
 BG        = "#07080b"
 SURFACE   = "#0d0f14"
@@ -878,36 +911,30 @@ with tab1:
     with col_l:
         st.markdown('<div class="sec-eyebrow">Statistik</div>', unsafe_allow_html=True)
         st.markdown('<div class="sec-title">Ringkasan Deskriptif</div>', unsafe_allow_html=True)
+        COMMODITY_ICONS2 = {"Gold":"🥇","Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵",
+                            "Tembaga":"🟠","Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
         desc = df_model[FEAT_AVAIL].describe().T.round(2).rename(
             columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
                      "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"})
-        stat_rows = ""
+        stat_rows = []
         for var in desc.index:
             r = desc.loc[var]
-            stat_rows += f"""
-            <tr style="border-bottom:1px solid #1d2335;">
-              <td style="padding:8px 12px;color:#f0c050;font-weight:600;font-size:0.8rem;">{var}</td>
-              <td style="padding:8px 12px;text-align:right;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{int(r['N'])}</td>
-              <td style="padding:8px 12px;text-align:right;color:#fde99a;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Mean']:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#c0cfe0;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Std']:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#f05060;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Min']:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Q1']:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#e8edf8;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Median']:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Q3']:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#2ec99a;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Max']:,.2f}</td>
-            </tr>"""
-        st.markdown(f"""
-        <div style="border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:320px;">
-          <table style="width:100%;border-collapse:collapse;">
-            <thead style="position:sticky;top:0;">
-              <tr style="background:#161b27;border-bottom:2px solid #252e44;">
-                {"".join(f'<th style="padding:9px 12px;text-align:{"left" if i==0 else "right"};color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;">{col}</th>' for i,col in enumerate(["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"]))}
-              </tr>
-            </thead>
-            <tbody style="background:#0d0f14;">{stat_rows}</tbody>
-          </table>
-        </div>
-        """, unsafe_allow_html=True)
+            icon = COMMODITY_ICONS2.get(var, "📊")
+            stat_rows.append([
+                (f"{icon} {var}", "#fde99a"),
+                (f"{int(r['N'])}", "#7a8aaa"),
+                (f"{r['Mean']:,.2f}", "#e8edf8"),
+                (f"{r['Std']:,.2f}", "#c0cfe0"),
+                (f"{r['Min']:,.2f}", "#f05060"),
+                (f"{r['Q1']:,.2f}", "#7a8aaa"),
+                (f"{r['Median']:,.2f}", "#f0c050"),
+                (f"{r['Q3']:,.2f}", "#7a8aaa"),
+                (f"{r['Max']:,.2f}", "#2ec99a"),
+            ])
+        st.markdown(styled_table(
+            ["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"],
+            stat_rows, max_height=320
+        ), unsafe_allow_html=True)
 
     with col_r:
         st.markdown('<div class="sec-eyebrow">Korelasi</div>', unsafe_allow_html=True)
@@ -928,12 +955,29 @@ with tab1:
         ax3.set_title("Korelasi Pearson terhadap Gold"); ax3.grid(True,axis="x",alpha=0.18)
         plt.tight_layout(); st.pyplot(fig3); plt.close(fig3)
 
-        # Correlation strength table
-        corr_df = pd.DataFrame({"Variabel":corr.index,"r":corr.values.round(3)})
-        corr_df["Kekuatan"] = corr_df["r"].abs().apply(
-            lambda v: "🟢 Kuat" if v>=0.6 else "🟡 Sedang" if v>=0.3 else "🔴 Lemah")
-        corr_df["Arah"] = corr_df["r"].apply(lambda v: "↑ Positif" if v>=0 else "↓ Negatif")
-        st.dataframe(corr_df, use_container_width=True, hide_index=True, height=245)
+        # Correlation strength table — styled
+        COMMODITY_ICONS = {"Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵","Tembaga":"🟠",
+                           "Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
+        corr_rows = []
+        for var, rv in zip(corr.index, corr.values):
+            rv_r = round(rv, 3)
+            bar_len = int(abs(rv_r) * 14)
+            bar_fill = "█" * bar_len + "░" * (14 - bar_len)
+            bar_color = "#2ec99a" if rv_r >= 0 else "#f05060"
+            strength = ("🟢 Kuat" if abs(rv_r)>=0.6 else "🟡 Sedang" if abs(rv_r)>=0.3 else "🔴 Lemah")
+            arah = "↑ Positif" if rv_r >= 0 else "↓ Negatif"
+            icon = COMMODITY_ICONS.get(var, "📊")
+            corr_rows.append([
+                (f"{icon} {var}", "#fde99a"),
+                (f"{rv_r:+.3f}", bar_color),
+                (f"<span style='font-size:0.65rem;letter-spacing:-1px;color:{bar_color};'>{bar_fill}</span>", bar_color),
+                (strength, "#e8edf8"),
+                (arah, bar_color),
+            ])
+        st.markdown(styled_table(
+            ["Variabel","r","Visual","Kekuatan","Arah"],
+            corr_rows, max_height=280
+        ), unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PREPROCESSING
@@ -1009,15 +1053,11 @@ if train_btn:
         pg2.progress(100,text="✅ BI-GRU selesai!")
 
     best_name=min(results,key=lambda k:results[k]["metrics"]["MAPE (%)"])
-    # Kunci best_name — hanya di-set sekali, tidak berubah saat re-run
-    if "best_name_locked" not in st.session_state:
-        st.session_state["best_name_locked"] = best_name
     st.session_state.update({
         "trained":True,"results":results,"y_test_actual":y_test_actual,
         "date_test":date_test,"gold_prev_test":gold_prev_test,
         "X_scaled":X_scaled,"scaler":scaler,"window_size":window_size,
-        "forecast_days":forecast_days,"n_feat":n_feat,
-        "best_name":st.session_state["best_name_locked"],
+        "forecast_days":forecast_days,"n_feat":n_feat,"best_name":best_name,
         "df_model":df_model,"FEAT_MODEL":FEAT_MODEL,
     })
 
@@ -1114,36 +1154,24 @@ def render_model_tab(key, color_model, badge_html):
             "Error Absolut":err.round(2),
             "Error (%)": (err/y_a*100).round(3),
         })
-        # Styled HTML table
-        err_pct_vals = (err/y_a*100).round(3)
-        tbl_rows = ""
+        ep_vals = (err/y_a*100)
+        detail_rows = []
         for i in range(len(df_t)):
-            ep = err_pct_vals[i]
+            ep = ep_vals[i]
             ep_color = "#2ec99a" if ep < 1 else "#f0c050" if ep < 3 else "#f05060"
-            tbl_rows += f"""
-            <tr style="border-bottom:1px solid #1d2335;">
-              <td style="padding:8px 12px;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{str(df_t["Tanggal"].iloc[i])[:10]}</td>
-              <td style="padding:8px 12px;text-align:right;color:#fde99a;font-family:JetBrains Mono,monospace;font-size:0.8rem;">${df_t["Aktual (USD)"].iloc[i]:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:{color_model};font-family:JetBrains Mono,monospace;font-size:0.8rem;">${df_t[f"Prediksi {key}"].iloc[i]:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:#e8edf8;font-family:JetBrains Mono,monospace;font-size:0.8rem;">${df_t["Error Absolut"].iloc[i]:,.2f}</td>
-              <td style="padding:8px 12px;text-align:right;color:{ep_color};font-family:JetBrains Mono,monospace;font-size:0.8rem;font-weight:600;">{ep:.3f}%</td>
-            </tr>"""
-        st.markdown(f"""
-        <div style="border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:380px;margin-bottom:12px;">
-          <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
-            <thead style="position:sticky;top:0;z-index:2;">
-              <tr style="background:#161b27;border-bottom:2px solid #252e44;">
-                <th style="padding:10px 12px;text-align:left;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Tanggal</th>
-                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Aktual</th>
-                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Prediksi</th>
-                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Error Abs</th>
-                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Error %</th>
-              </tr>
-            </thead>
-            <tbody style="background:#0d0f14;">{tbl_rows}</tbody>
-          </table>
-        </div>
-        """, unsafe_allow_html=True)
+            acc_icon = "🟢" if ep < 1 else "🟡" if ep < 3 else "🔴"
+            detail_rows.append([
+                (str(df_t["Tanggal"].iloc[i])[:10], "#7a8aaa"),
+                (f"${y_a[i]:,.2f}", "#fde99a"),
+                (f"${y_p[i]:,.2f}", color_model),
+                (f"${err[i]:,.2f}", ep_color),
+                (f"{ep:.3f}%", ep_color),
+                (acc_icon, ep_color),
+            ])
+        st.markdown(styled_table(
+            ["📅 Tanggal","🥇 Aktual","🎯 Prediksi","Err Abs","Err %","Akurasi"],
+            detail_rows, max_height=380
+        ), unsafe_allow_html=True)
         st.download_button(f"⬇️ Download CSV — {key}",
                            data=df_t.to_csv(index=False).encode(),
                            file_name=f"prediksi_{key.lower().replace('-','_')}.csv",
@@ -1179,51 +1207,31 @@ with tab4:
 
         st.markdown(f'<div style="margin-bottom:20px">Model Terbaik: <span class="badge-aurum">🏆 {best}</span></div>', unsafe_allow_html=True)
 
-        # Tabel
-        metrics_list = ["MAE","RMSE","MAPE (%)","Akurasi (%)","R²"]
-        units        = {"MAE":"USD","RMSE":"USD","MAPE (%)":"%","Akurasi (%)":"%","R²":""}
+        # Tabel perbandingan metrik — styled
+        METRIC_ICONS = {"MAE":"📏","RMSE":"📐","MAPE (%)":"🎯","Akurasi (%)":"✅","R²":"📊"}
         higher_better = ["Akurasi (%)","R²"]
-
-        rows_html = ""
-        for mk in metrics_list:
+        cmp_rows = []
+        for mk in ["MAE","RMSE","MAPE (%)","Akurasi (%)","R²"]:
             lv = lm[mk]; gv = gm[mk]
             hi = mk in higher_better
             lstm_win = (lv <= gv and not hi) or (lv >= gv and hi)
-            gru_win  = not lstm_win
-            u = units[mk]
-            fmt = lambda v: f"{v:.4f}{' '+u if u else ''}"
-            lstm_cell = f'<td style="text-align:center;color:{"#f0c050" if lstm_win else "#7a8aaa"};font-weight:{"700" if lstm_win else "400"};background:{"#f0c05015" if lstm_win else "transparent"};border-radius:6px;padding:10px 14px;">{fmt(lv)} {"🏆" if lstm_win else ""}</td>'
-            gru_cell  = f'<td style="text-align:center;color:{"#2ec99a" if gru_win else "#7a8aaa"};font-weight:{"700" if gru_win else "400"};background:{"#2ec99a15" if gru_win else "transparent"};border-radius:6px;padding:10px 14px;">{fmt(gv)} {"🏆" if gru_win else ""}</td>'
+            lc = "#f05060" if lstm_win else "#f0506066"
+            gc = "#2ec99a" if not lstm_win else "#2ec99a66"
             delta = abs(lv - gv)
-            delta_str = f"{delta:.4f}"
-            winner_badge = '<span style="background:#f05060;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">BI-LSTM</span>' if lstm_win else '<span style="background:#2ec99a;color:#07080b;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">BI-GRU</span>'
-            rows_html += f"""
-            <tr style="border-bottom:1px solid #1d2335;">
-                <td style="padding:10px 14px;font-family:JetBrains Mono,monospace;font-size:0.82rem;color:#e8edf8;font-weight:600;">{mk}</td>
-                {lstm_cell}
-                {gru_cell}
-                <td style="text-align:center;padding:10px 14px;color:#4a5570;font-family:JetBrains Mono,monospace;font-size:0.8rem;">{delta_str}</td>
-                <td style="text-align:center;padding:10px 14px;">{winner_badge}</td>
-            </tr>"""
-
-        st.markdown(f"""
-        <div style="border:1px solid #1d2335;border-radius:14px;overflow:hidden;margin-bottom:20px;">
-          <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
-            <thead>
-              <tr style="background:linear-gradient(90deg,#161b27,#12151e);border-bottom:2px solid #252e44;">
-                <th style="padding:12px 14px;text-align:left;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">Metrik</th>
-                <th style="padding:12px 14px;text-align:center;color:#f05060;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">🔴 BI-LSTM</th>
-                <th style="padding:12px 14px;text-align:center;color:#2ec99a;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">🟢 BI-GRU</th>
-                <th style="padding:12px 14px;text-align:center;color:#4a5570;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">Δ Selisih</th>
-                <th style="padding:12px 14px;text-align:center;color:#4a5570;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">Unggul</th>
-              </tr>
-            </thead>
-            <tbody style="background:#0d0f14;">
-              {rows_html}
-            </tbody>
-          </table>
-        </div>
-        """, unsafe_allow_html=True)
+            winner = ("🔴 BI-LSTM" if lstm_win else "🟢 BI-GRU")
+            winner_c = "#f05060" if lstm_win else "#2ec99a"
+            icon = METRIC_ICONS.get(mk, "📊")
+            cmp_rows.append([
+                (f"{icon} {mk}", "#fde99a"),
+                (f"{lv:.4f} {'🏆' if lstm_win else ''}", lc),
+                (f"{gv:.4f} {'🏆' if not lstm_win else ''}", gc),
+                (f"{delta:.4f}", "#4a5570"),
+                (winner, winner_c),
+            ])
+        st.markdown(styled_table(
+            ["Metrik","🔴 BI-LSTM","🟢 BI-GRU","Δ Selisih","Unggul"],
+            cmp_rows, max_height=300
+        ), unsafe_allow_html=True)
 
         st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
 
@@ -1297,13 +1305,33 @@ with tab4:
         plt.tight_layout(); st.pyplot(fig4); plt.close(fig4)
 
         with st.expander("📋 Tabel Perbandingan Prediksi"):
+            lstm_p = results["BI-LSTM"]["pred_price"].round(2)
+            gru_p  = results["BI-GRU"]["pred_price"].round(2)
+            overlay_rows = []
+            for i in range(len(y_act)):
+                act = y_act[i]
+                lp  = lstm_p[i]; gp = gru_p[i]
+                le  = abs(act-lp); ge = abs(act-gp)
+                lstm_win = le <= ge
+                overlay_rows.append([
+                    (str(date_t.values[i])[:10], "#7a8aaa"),
+                    (f"${act:,.2f}", "#fde99a"),
+                    (f"${lp:,.2f}", "#f05060" if lstm_win else "#f0506099"),
+                    (f"${gp:,.2f}", "#2ec99a" if not lstm_win else "#2ec99a99"),
+                    (f"${le:,.2f}", "#f05060" if le>ge else "#2ec99a"),
+                    (f"${ge:,.2f}", "#f05060" if ge>le else "#2ec99a"),
+                    ("🔴 LSTM" if lstm_win else "🟢 GRU", "#f05060" if lstm_win else "#2ec99a"),
+                ])
+            st.markdown(styled_table(
+                ["📅 Tanggal","🥇 Aktual","🔴 BI-LSTM","🟢 BI-GRU","Err LSTM","Err GRU","Lebih Dekat"],
+                overlay_rows, max_height=360
+            ), unsafe_allow_html=True)
             df_h=pd.DataFrame({
                 "Tanggal":date_t.values,
                 "Gold Aktual":y_act.round(2),
-                "Prediksi BI-LSTM":results["BI-LSTM"]["pred_price"].round(2),
-                "Prediksi BI-GRU":results["BI-GRU"]["pred_price"].round(2),
+                "Prediksi BI-LSTM":lstm_p,
+                "Prediksi BI-GRU":gru_p,
             })
-            st.dataframe(df_h,use_container_width=True,hide_index=True)
             st.download_button("⬇️ Download Hasil Testing",
                                data=df_h.to_csv(index=False).encode(),
                                file_name="hasil_testing_gabungan.csv",mime="text/csv")
@@ -1423,7 +1451,25 @@ with tab5:
         col_tbl,col_dl=st.columns([3,1])
         with col_tbl:
             with st.expander("📋 Tabel Prediksi Lengkap"):
-                st.dataframe(df_future,use_container_width=True,hide_index=True)
+                forecast_rows = []
+                cum = fp - last_price
+                for i in range(len(fp)):
+                    d_val = deltas[i]; c_val = cum[i]
+                    d_color = "#2ec99a" if d_val >= 0 else "#f05060"
+                    c_color = "#2ec99a" if c_val >= 0 else "#f05060"
+                    trend = "📈" if d_val >= 0 else "📉"
+                    forecast_rows.append([
+                        (f"{i+1}", "#4a5570"),
+                        (date_labels[i], "#7a8aaa"),
+                        (f"${fp[i]:,.2f}", mc),
+                        (f"{'+' if d_val>=0 else ''}${d_val:,.2f}", d_color),
+                        (f"{'+' if c_val>=0 else ''}${c_val:,.2f}", c_color),
+                        (trend, d_color),
+                    ])
+                st.markdown(styled_table(
+                    ["#","📅 Tanggal",f"💰 Prediksi","Δ Harian","Δ Kumulatif","Tren"],
+                    forecast_rows, max_height=400
+                ), unsafe_allow_html=True)
         with col_dl:
             st.download_button(
                 "⬇️ Download CSV",
