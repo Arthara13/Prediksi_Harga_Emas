@@ -3,5 +3,5 @@ pandas
 numpy
 matplotlib
 scikit-learn
-tf-keras
+tensorflow==2.19.1
 openpyxl
