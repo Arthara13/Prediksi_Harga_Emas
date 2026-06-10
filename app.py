@@ -878,11 +878,36 @@ with tab1:
     with col_l:
         st.markdown('<div class="sec-eyebrow">Statistik</div>', unsafe_allow_html=True)
         st.markdown('<div class="sec-title">Ringkasan Deskriptif</div>', unsafe_allow_html=True)
-        st.dataframe(
-            df_model[FEAT_AVAIL].describe().T.round(2)
-              .rename(columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
-                               "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"}),
-            use_container_width=True, height=300)
+        desc = df_model[FEAT_AVAIL].describe().T.round(2).rename(
+            columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
+                     "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"})
+        stat_rows = ""
+        for var in desc.index:
+            r = desc.loc[var]
+            stat_rows += f"""
+            <tr style="border-bottom:1px solid #1d2335;">
+              <td style="padding:8px 12px;color:#f0c050;font-weight:600;font-size:0.8rem;">{var}</td>
+              <td style="padding:8px 12px;text-align:right;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{int(r['N'])}</td>
+              <td style="padding:8px 12px;text-align:right;color:#fde99a;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Mean']:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#c0cfe0;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Std']:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#f05060;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Min']:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Q1']:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#e8edf8;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Median']:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Q3']:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#2ec99a;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{r['Max']:,.2f}</td>
+            </tr>"""
+        st.markdown(f"""
+        <div style="border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:320px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead style="position:sticky;top:0;">
+              <tr style="background:#161b27;border-bottom:2px solid #252e44;">
+                {"".join(f'<th style="padding:9px 12px;text-align:{"left" if i==0 else "right"};color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;">{col}</th>' for i,col in enumerate(["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"]))}
+              </tr>
+            </thead>
+            <tbody style="background:#0d0f14;">{stat_rows}</tbody>
+          </table>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col_r:
         st.markdown('<div class="sec-eyebrow">Korelasi</div>', unsafe_allow_html=True)
@@ -984,11 +1009,15 @@ if train_btn:
         pg2.progress(100,text="✅ BI-GRU selesai!")
 
     best_name=min(results,key=lambda k:results[k]["metrics"]["MAPE (%)"])
+    # Kunci best_name — hanya di-set sekali, tidak berubah saat re-run
+    if "best_name_locked" not in st.session_state:
+        st.session_state["best_name_locked"] = best_name
     st.session_state.update({
         "trained":True,"results":results,"y_test_actual":y_test_actual,
         "date_test":date_test,"gold_prev_test":gold_prev_test,
         "X_scaled":X_scaled,"scaler":scaler,"window_size":window_size,
-        "forecast_days":forecast_days,"n_feat":n_feat,"best_name":best_name,
+        "forecast_days":forecast_days,"n_feat":n_feat,
+        "best_name":st.session_state["best_name_locked"],
         "df_model":df_model,"FEAT_MODEL":FEAT_MODEL,
     })
 
@@ -1085,7 +1114,36 @@ def render_model_tab(key, color_model, badge_html):
             "Error Absolut":err.round(2),
             "Error (%)": (err/y_a*100).round(3),
         })
-        st.dataframe(df_t,use_container_width=True,hide_index=True)
+        # Styled HTML table
+        err_pct_vals = (err/y_a*100).round(3)
+        tbl_rows = ""
+        for i in range(len(df_t)):
+            ep = err_pct_vals[i]
+            ep_color = "#2ec99a" if ep < 1 else "#f0c050" if ep < 3 else "#f05060"
+            tbl_rows += f"""
+            <tr style="border-bottom:1px solid #1d2335;">
+              <td style="padding:8px 12px;color:#7a8aaa;font-family:JetBrains Mono,monospace;font-size:0.78rem;">{str(df_t["Tanggal"].iloc[i])[:10]}</td>
+              <td style="padding:8px 12px;text-align:right;color:#fde99a;font-family:JetBrains Mono,monospace;font-size:0.8rem;">${df_t["Aktual (USD)"].iloc[i]:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:{color_model};font-family:JetBrains Mono,monospace;font-size:0.8rem;">${df_t[f"Prediksi {key}"].iloc[i]:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:#e8edf8;font-family:JetBrains Mono,monospace;font-size:0.8rem;">${df_t["Error Absolut"].iloc[i]:,.2f}</td>
+              <td style="padding:8px 12px;text-align:right;color:{ep_color};font-family:JetBrains Mono,monospace;font-size:0.8rem;font-weight:600;">{ep:.3f}%</td>
+            </tr>"""
+        st.markdown(f"""
+        <div style="border:1px solid #1d2335;border-radius:12px;overflow:auto;max-height:380px;margin-bottom:12px;">
+          <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
+            <thead style="position:sticky;top:0;z-index:2;">
+              <tr style="background:#161b27;border-bottom:2px solid #252e44;">
+                <th style="padding:10px 12px;text-align:left;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Tanggal</th>
+                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Aktual</th>
+                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Prediksi</th>
+                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Error Abs</th>
+                <th style="padding:10px 12px;text-align:right;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;">Error %</th>
+              </tr>
+            </thead>
+            <tbody style="background:#0d0f14;">{tbl_rows}</tbody>
+          </table>
+        </div>
+        """, unsafe_allow_html=True)
         st.download_button(f"⬇️ Download CSV — {key}",
                            data=df_t.to_csv(index=False).encode(),
                            file_name=f"prediksi_{key.lower().replace('-','_')}.csv",
@@ -1122,18 +1180,50 @@ with tab4:
         st.markdown(f'<div style="margin-bottom:20px">Model Terbaik: <span class="badge-aurum">🏆 {best}</span></div>', unsafe_allow_html=True)
 
         # Tabel
-        df_cmp=pd.DataFrame({
-            "Metrik":["MAE","RMSE","MAPE (%)","Akurasi (%)","R²"],
-            "BI-LSTM":[round(lm[k],4) for k in ["MAE","RMSE","MAPE (%)","Akurasi (%)","R²"]],
-            "BI-GRU" :[round(gm[k],4) for k in ["MAE","RMSE","MAPE (%)","Akurasi (%)","R²"]],
-        })
-        df_cmp["Δ Selisih"]=(df_cmp["BI-LSTM"]-df_cmp["BI-GRU"]).abs().round(4)
-        df_cmp["Unggul"]=df_cmp.apply(
-            lambda r:"🔴 BI-LSTM" if (
-                (r["Metrik"] in ["MAE","RMSE","MAPE (%)"] and lm[r["Metrik"]]<=gm[r["Metrik"]])
-                or (r["Metrik"] in ["Akurasi (%)","R²"] and lm[r["Metrik"]]>=gm[r["Metrik"]])
-            ) else "🟢 BI-GRU",axis=1)
-        st.dataframe(df_cmp,use_container_width=True,hide_index=True)
+        metrics_list = ["MAE","RMSE","MAPE (%)","Akurasi (%)","R²"]
+        units        = {"MAE":"USD","RMSE":"USD","MAPE (%)":"%","Akurasi (%)":"%","R²":""}
+        higher_better = ["Akurasi (%)","R²"]
+
+        rows_html = ""
+        for mk in metrics_list:
+            lv = lm[mk]; gv = gm[mk]
+            hi = mk in higher_better
+            lstm_win = (lv <= gv and not hi) or (lv >= gv and hi)
+            gru_win  = not lstm_win
+            u = units[mk]
+            fmt = lambda v: f"{v:.4f}{' '+u if u else ''}"
+            lstm_cell = f'<td style="text-align:center;color:{"#f0c050" if lstm_win else "#7a8aaa"};font-weight:{"700" if lstm_win else "400"};background:{"#f0c05015" if lstm_win else "transparent"};border-radius:6px;padding:10px 14px;">{fmt(lv)} {"🏆" if lstm_win else ""}</td>'
+            gru_cell  = f'<td style="text-align:center;color:{"#2ec99a" if gru_win else "#7a8aaa"};font-weight:{"700" if gru_win else "400"};background:{"#2ec99a15" if gru_win else "transparent"};border-radius:6px;padding:10px 14px;">{fmt(gv)} {"🏆" if gru_win else ""}</td>'
+            delta = abs(lv - gv)
+            delta_str = f"{delta:.4f}"
+            winner_badge = '<span style="background:#f05060;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">BI-LSTM</span>' if lstm_win else '<span style="background:#2ec99a;color:#07080b;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">BI-GRU</span>'
+            rows_html += f"""
+            <tr style="border-bottom:1px solid #1d2335;">
+                <td style="padding:10px 14px;font-family:JetBrains Mono,monospace;font-size:0.82rem;color:#e8edf8;font-weight:600;">{mk}</td>
+                {lstm_cell}
+                {gru_cell}
+                <td style="text-align:center;padding:10px 14px;color:#4a5570;font-family:JetBrains Mono,monospace;font-size:0.8rem;">{delta_str}</td>
+                <td style="text-align:center;padding:10px 14px;">{winner_badge}</td>
+            </tr>"""
+
+        st.markdown(f"""
+        <div style="border:1px solid #1d2335;border-radius:14px;overflow:hidden;margin-bottom:20px;">
+          <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
+            <thead>
+              <tr style="background:linear-gradient(90deg,#161b27,#12151e);border-bottom:2px solid #252e44;">
+                <th style="padding:12px 14px;text-align:left;color:#f0c050;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">Metrik</th>
+                <th style="padding:12px 14px;text-align:center;color:#f05060;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">🔴 BI-LSTM</th>
+                <th style="padding:12px 14px;text-align:center;color:#2ec99a;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">🟢 BI-GRU</th>
+                <th style="padding:12px 14px;text-align:center;color:#4a5570;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">Δ Selisih</th>
+                <th style="padding:12px 14px;text-align:center;color:#4a5570;font-family:JetBrains Mono,monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;">Unggul</th>
+              </tr>
+            </thead>
+            <tbody style="background:#0d0f14;">
+              {rows_html}
+            </tbody>
+          </table>
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
 
