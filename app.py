@@ -668,15 +668,87 @@ with st.sidebar:
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f"""
-    <div style="margin-top:16px;padding:12px 14px;
-        background:linear-gradient({CARD},{SURFACE});
-        border:1px solid {BORDER};border-radius:10px;text-align:center;">
-        <div style="font-family:JetBrains Mono,monospace;font-size:0.62rem;
-            color:{MUTED};line-height:1.8;">
-            Gold Predictor v5.0 · Return-based DL<br>
-            BI-LSTM · BI-GRU · MinMaxScaler<br>
-            <span style="color:{GOLD};">Gold Price Forecasting</span>
+    <!-- Team Card -->
+    <div style="margin-top:16px;background:linear-gradient(145deg,#0d0f14,#12151e);
+        border:1px solid #252e44;border-radius:14px;overflow:hidden;">
+
+      <!-- Header strip -->
+      <div style="background:linear-gradient(90deg,#1a1400,#2a1e00,#1a1400);
+          border-bottom:1px solid #3a2800;padding:10px 14px;">
+        <div style="font-family:Cinzel,serif;font-size:0.62rem;font-weight:700;
+            letter-spacing:0.18em;color:#f0c050;text-transform:uppercase;">
+            ✦ Tim Peneliti ✦
         </div>
+      </div>
+
+      <!-- Dosen & Asisten -->
+      <div style="padding:10px 14px 6px;">
+        <div style="font-family:JetBrains Mono,monospace;font-size:0.55rem;
+            letter-spacing:0.14em;color:#7a5010;text-transform:uppercase;margin-bottom:6px;">
+            Dosen Pengampu
+        </div>
+        <div style="font-family:Inter,sans-serif;font-size:0.72rem;
+            color:#fde99a;font-weight:600;line-height:1.6;padding-left:6px;
+            border-left:2px solid #f0c050;">
+            Noviyanti Santoso, S.Si., M.Si., Ph.D.
+        </div>
+        <div style="font-family:JetBrains Mono,monospace;font-size:0.55rem;
+            letter-spacing:0.14em;color:#7a5010;text-transform:uppercase;
+            margin-top:8px;margin-bottom:6px;">
+            Asisten Dosen
+        </div>
+        <div style="font-family:Inter,sans-serif;font-size:0.72rem;
+            color:#d4a843;font-weight:500;line-height:1.6;padding-left:6px;
+            border-left:2px solid #b8832a;">
+            Robi Wardana, S.Tr Stat
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="height:1px;background:linear-gradient(90deg,transparent,#2a1e00,transparent);
+          margin:6px 0;"></div>
+
+      <!-- Mahasiswa -->
+      <div style="padding:6px 14px 12px;">
+        <div style="font-family:JetBrains Mono,monospace;font-size:0.55rem;
+            letter-spacing:0.14em;color:#7a5010;text-transform:uppercase;margin-bottom:8px;">
+            Anggota Kelompok
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;
+            padding:5px 0;border-bottom:1px solid #1d2335;">
+          <span style="font-family:Inter,sans-serif;font-size:0.68rem;color:#e8edf8;">M. Rizal Matofani</span>
+          <span style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:#f0c050;">2043231001</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;
+            padding:5px 0;border-bottom:1px solid #1d2335;">
+          <span style="font-family:Inter,sans-serif;font-size:0.68rem;color:#e8edf8;">Kanaya Tsabithatiz Z.</span>
+          <span style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:#f0c050;">2053231071</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;
+            padding:5px 0;border-bottom:1px solid #1d2335;">
+          <span style="font-family:Inter,sans-serif;font-size:0.68rem;color:#e8edf8;">Arthur Fikry Swara</span>
+          <span style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:#f0c050;">2043231076</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;
+            padding:5px 0;border-bottom:1px solid #1d2335;">
+          <span style="font-family:Inter,sans-serif;font-size:0.68rem;color:#e8edf8;">Stefy Aurelia Ginting</span>
+          <span style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:#f0c050;">2043231101</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;
+            padding:5px 0;">
+          <span style="font-family:Inter,sans-serif;font-size:0.68rem;color:#e8edf8;">M. Rizky Imanuhan</span>
+          <span style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:#f0c050;">2043231102</span>
+        </div>
+      </div>
+
+      <!-- Bottom strip -->
+      <div style="background:linear-gradient(90deg,#1a1400,#2a1e00,#1a1400);
+          border-top:1px solid #3a2800;padding:6px 14px;text-align:center;">
+        <div style="font-family:JetBrains Mono,monospace;font-size:0.55rem;
+            color:#7a5010;letter-spacing:0.12em;">
+            Gold Predictor v5.0 · BI-LSTM & BI-GRU
+        </div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -923,43 +995,40 @@ with tab1:
 
     st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
 
-    # ── ROW 1: Statistik Deskriptif full width ──────────────────────────────
-    st.markdown('<div class="sec-eyebrow">Statistik</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">Ringkasan Deskriptif</div>', unsafe_allow_html=True)
-    COMMODITY_ICONS2 = {"Gold":"🥇","Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵",
-                        "Tembaga":"🟠","Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
-    desc = df_model[FEAT_AVAIL].describe().T.round(2).rename(
-        columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
-                 "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"})
-    stat_rows = []
-    for var in desc.index:
-        r = desc.loc[var]
-        icon = COMMODITY_ICONS2.get(var, "📊")
-        stat_rows.append([
-            (icon + " " + var, "#fde99a"),
-            (str(int(r["N"])), "#7a8aaa"),
-            ("%.2f" % r["Mean"], "#e8edf8"),
-            ("%.2f" % r["Std"], "#c0cfe0"),
-            ("%.2f" % r["Min"], "#f05060"),
-            ("%.2f" % r["Q1"], "#7a8aaa"),
-            ("%.2f" % r["Median"], "#f0c050"),
-            ("%.2f" % r["Q3"], "#7a8aaa"),
-            ("%.2f" % r["Max"], "#2ec99a"),
-        ])
-    st.markdown(styled_table(
-        ["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"],
-        stat_rows, max_height=300
-    ), unsafe_allow_html=True)
-
-    st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
-
-    # ── ROW 2: Korelasi (kiri) + Distribusi Harga Emas (kanan) ──────────────
-    col_l, col_r = st.columns(2)
+    col_l,col_r = st.columns([1.2,1])
     with col_l:
+        st.markdown('<div class="sec-eyebrow">Statistik</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sec-title">Ringkasan Deskriptif</div>', unsafe_allow_html=True)
+        COMMODITY_ICONS2 = {"Gold":"🥇","Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵",
+                            "Tembaga":"🟠","Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
+        desc = df_model[FEAT_AVAIL].describe().T.round(2).rename(
+            columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
+                     "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"})
+        stat_rows = []
+        for var in desc.index:
+            r = desc.loc[var]
+            icon = COMMODITY_ICONS2.get(var, "📊")
+            stat_rows.append([
+                (icon + " " + var, "#fde99a"),
+                (str(int(r["N"])), "#7a8aaa"),
+                ("%.2f" % r["Mean"], "#e8edf8"),
+                ("%.2f" % r["Std"], "#c0cfe0"),
+                ("%.2f" % r["Min"], "#f05060"),
+                ("%.2f" % r["Q1"], "#7a8aaa"),
+                ("%.2f" % r["Median"], "#f0c050"),
+                ("%.2f" % r["Q3"], "#7a8aaa"),
+                ("%.2f" % r["Max"], "#2ec99a"),
+            ])
+        st.markdown(styled_table(
+            ["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"],
+            stat_rows, max_height=320
+        ), unsafe_allow_html=True)
+
+    with col_r:
         st.markdown('<div class="sec-eyebrow">Korelasi</div>', unsafe_allow_html=True)
         st.markdown('<div class="sec-title">Hubungan terhadap Gold</div>', unsafe_allow_html=True)
         corr = df_model[FEAT_AVAIL].corr()["Gold"].drop("Gold").sort_values(ascending=False)
-        fig3, ax3 = plt.subplots(figsize=(6,4))
+        fig3, ax3 = plt.subplots(figsize=(5.5,4))
         cb = [EMERALD if v>=0 else RUBY for v in corr.values]
         bars3 = ax3.barh(corr.index[::-1], corr.values[::-1],
                          color=cb[::-1], alpha=0.82, height=0.55, zorder=3)
@@ -974,6 +1043,7 @@ with tab1:
         ax3.set_title("Korelasi Pearson terhadap Gold"); ax3.grid(True,axis="x",alpha=0.18)
         plt.tight_layout(); st.pyplot(fig3); plt.close(fig3)
 
+        # Correlation strength table — styled
         COMMODITY_ICONS = {"Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵","Tembaga":"🟠",
                            "Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
         corr_rows = []
@@ -993,72 +1063,9 @@ with tab1:
                 (arah, bar_color),
             ])
         st.markdown(styled_table(
-            ["Variabel","r","Visual","Kekuatan","Arah"],
+            ["Variabel", "r", "Visual", "Kekuatan", "Arah"],
             corr_rows, max_height=280
         ), unsafe_allow_html=True)
-
-    with col_r:
-        st.markdown('<div class="sec-eyebrow">Distribusi</div>', unsafe_allow_html=True)
-        st.markdown('<div class="sec-title">Distribusi & Volatilitas</div>', unsafe_allow_html=True)
-
-        # Histogram distribusi harga emas
-        fig_dist, (ax_hist, ax_vol) = plt.subplots(2, 1, figsize=(6, 4.2),
-                                                     gridspec_kw={"hspace": 0.42})
-        # Histogram
-        gold_vals_all = df_model["Gold"].values
-        n_bins = 30
-        n, bins, patches = ax_hist.hist(gold_vals_all, bins=n_bins, color=GOLD, alpha=0.75, edgecolor=CARD, linewidth=0.4)
-        # Color bins by value range
-        norm_vals = (bins[:-1] - bins[:-1].min()) / (bins[:-1].max() - bins[:-1].min() + 1e-9)
-        for patch, nv in zip(patches, norm_vals):
-            patch.set_facecolor(plt.cm.YlOrRd(0.3 + nv * 0.6))
-        # Mean & median lines
-        mean_g = gold_vals_all.mean(); med_g = float(np.median(gold_vals_all))
-        ax_hist.axvline(mean_g, color=EMERALD, linewidth=1.5, linestyle="--", label=f"Mean ${mean_g:,.0f}")
-        ax_hist.axvline(med_g,  color=RUBY,    linewidth=1.5, linestyle=":",  label=f"Median ${med_g:,.0f}")
-        ax_hist.set_title("Distribusi Harga Emas (USD)", fontsize=9.5)
-        ax_hist.set_xlabel("Harga (USD)"); ax_hist.set_ylabel("Frekuensi")
-        ax_hist.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x,_: f"${x:,.0f}"))
-        ax_hist.legend(fontsize=7.5, facecolor=CARD, edgecolor=BORDER, labelcolor=TEXT)
-        ax_hist.grid(True, alpha=0.18)
-
-        # Rolling volatility 30-day
-        roll_vol = df_model["Gold_Return"].rolling(30).std() * 100
-        ax_vol.fill_between(df_model["Tanggal"].values, roll_vol.values,
-                            alpha=0.55, color=RUBY)
-        ax_vol.plot(df_model["Tanggal"].values, roll_vol.values,
-                    color=RUBY, linewidth=1.2)
-        ax_vol.set_title("Volatilitas Rolling 30-Hari (%)", fontsize=9.5)
-        ax_vol.set_ylabel("Volatilitas (%)"); ax_vol.grid(True, alpha=0.18)
-        ax_vol.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x,_: f"{x:.2f}%"))
-        fig_dist.autofmt_xdate(rotation=20)
-        plt.tight_layout(); st.pyplot(fig_dist); plt.close(fig_dist)
-
-        # Mini stats cards bawah
-        vol_cur  = float(roll_vol.dropna().iloc[-1])
-        vol_max  = float(roll_vol.dropna().max())
-        skewness = float(df_model["Gold"].skew())
-        kurtosis = float(df_model["Gold"].kurt())
-        st.markdown(f"""
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
-          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Volatilitas Saat Ini</div>
-            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{RUBY};font-weight:700;margin-top:4px;">{vol_cur:.2f}%</div>
-          </div>
-          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Volatilitas Tertinggi</div>
-            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{GOLD};font-weight:700;margin-top:4px;">{vol_max:.2f}%</div>
-          </div>
-          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Skewness</div>
-            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{TEXTD};font-weight:700;margin-top:4px;">{skewness:+.3f}</div>
-          </div>
-          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Kurtosis</div>
-            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{TEXTD};font-weight:700;margin-top:4px;">{kurtosis:+.3f}</div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PREPROCESSING
