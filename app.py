@@ -658,10 +658,13 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown(f'<div class="sb-card"><div class="sb-card-title">📂 Dataset</div>', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Upload (.xlsx / .csv)", type=["xlsx","xls","csv"],
-                                     label_visibility="collapsed")
-    sheet_name = st.text_input("Sheet", value="Data Aligned",
-                                placeholder="Nama sheet Excel...")
+    st.markdown(f"""
+    <div style="font-family:JetBrains Mono,monospace;font-size:0.72rem;color:{TEXTD};line-height:2;">
+        📄 data_lengkap_ML_aligned_v2.xlsx<br>
+        <span style="color:{MUTED};">Sheet: Data Aligned · Auto-loaded</span><br>
+        <span style="color:{EMERALD};">✅ Data siap digunakan</span>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f'<div class="sb-card"><div class="sb-card-title">🧠 Parameter Model</div>', unsafe_allow_html=True)
@@ -692,49 +695,15 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# LOAD DATA
+# LOAD DATA — auto dari folder data/
 # ═══════════════════════════════════════════════════════════════════════════
 FEATURES_RAW = ["Gold","Batu Bara","Nikel","USD Index","Tembaga","Inflasi Global","Bitcoin","Perak"]
 
-if uploaded_file is None:
-    # Hero (no data state)
-    st.markdown(f"""
-    <div class="aurum-hero">
-        <div class="hero-eyebrow">Deep Learning · Time Series · Commodity Intelligence</div>
-        <div class="hero-title">Gold Price<br>Intelligence</div>
-        <div class="hero-sub">
-            Platform prediksi harga emas berbasis <b style="color:{TEXT}">BI-LSTM</b> dan
-            <b style="color:{TEXT}">BI-GRU</b> dengan pendekatan <b style="color:{GOLD}">Return Target</b>
-            — memanfaatkan data makroekonomi global untuk menghasilkan prakiraan harga yang presisi.
-        </div>
-        <div class="hero-tags">
-            <span class="hero-tag">Bidirectional LSTM</span>
-            <span class="hero-tag">Bidirectional GRU</span>
-            <span class="hero-tag">Return-Based</span>
-            <span class="hero-tag">Multi-Feature</span>
-            <span class="hero-tag">Deep Learning</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(f"""
-    <div class="info-banner">
-        <b style="color:{TEXT};">👈 Upload dataset untuk memulai analisis.</b><br><br>
-        Format yang dibutuhkan:<br>
-        &nbsp;• File <b style="color:{GOLD};">.xlsx</b> dengan sheet <b style="color:{GOLD};">"Data Aligned"</b><br>
-        &nbsp;• Kolom wajib: <b style="color:{TEXT};">Tanggal, Gold</b><br>
-        &nbsp;• Kolom fitur: Batu Bara, Nikel, USD Index, Tembaga, Inflasi Global, Bitcoin, Perak
-    </div>
-    """, unsafe_allow_html=True)
-    st.stop()
-
-# Read
-raw_bytes = uploaded_file.read()
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "data_lengkap_ML_aligned_v2.xlsx")
 try:
-    df_raw = pd.read_csv(io.BytesIO(raw_bytes)) if uploaded_file.name.endswith(".csv") \
-             else pd.read_excel(io.BytesIO(raw_bytes), sheet_name=sheet_name)
+    df_raw = pd.read_excel(DATA_PATH, sheet_name="Data Aligned")
 except Exception as e:
-    st.error(f"Gagal membaca file: {e}"); st.stop()
+    st.error(f"❌ Gagal membaca data: {e}"); st.stop()
 
 df_raw = df_raw.rename(columns={
     "tanggal":"Tanggal","usd index":"USD Index","USD index":"USD Index",
