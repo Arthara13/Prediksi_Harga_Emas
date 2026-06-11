@@ -667,20 +667,6 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown(f'<div class="sb-card"><div class="sb-card-title">🧠 Parameter Model</div>', unsafe_allow_html=True)
-    window_size   = st.slider("Window Size (lookback)", 10, 60, 30)
-    forecast_days = st.slider("Hari Prediksi", 7, 180, 30)
-    epochs        = st.slider("Max Epoch", 30, 200, 100, 10)
-    batch_size    = st.selectbox("Batch Size", [8,16,32], index=1)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown(f'<div class="sb-card"><div class="sb-card-title">🔬 Pilih Model</div>', unsafe_allow_html=True)
-    run_lstm = st.checkbox("BI-LSTM", value=True)
-    run_gru  = st.checkbox("BI-GRU",  value=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    train_btn = st.button("⚡ Mulai Training", type="primary")
-
     st.markdown(f"""
     <div style="margin-top:16px;padding:12px 14px;
         background:linear-gradient({CARD},{SURFACE});
@@ -798,6 +784,73 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════
+# TRAINING PANEL — di area utama agar mudah ditemukan
+# ═══════════════════════════════════════════════════════════════════════════
+st.markdown(f"""
+<div style="background:linear-gradient(135deg,{CARD},{CARD2});
+    border:1px solid {BORDER2};border-radius:16px;padding:24px 28px;margin:20px 0;">
+    <div style="font-family:Cinzel,serif;font-size:1rem;font-weight:700;
+        color:{GOLD};letter-spacing:0.08em;margin-bottom:4px;">
+        ⚡ Training Model
+    </div>
+    <div style="font-family:JetBrains Mono,monospace;font-size:0.68rem;
+        color:{MUTED};margin-bottom:18px;">
+        Atur parameter lalu klik Mulai Training
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+with st.container():
+    pcol1, pcol2, pcol3, pcol4 = st.columns(4)
+    with pcol1:
+        st.markdown(f"""<div style="background:{CARD};border:1px solid {BORDER};
+            border-radius:12px;padding:16px 18px;margin-bottom:8px;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.65rem;
+                color:{GOLD};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+                🪟 Window Size</div>""", unsafe_allow_html=True)
+        window_size = st.slider("Window Size (lookback)", 10, 60, 30, label_visibility="collapsed")
+        st.markdown(f"""<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;
+            color:{TEXTD};">Nilai: <b style="color:{TEXT};">{window_size} hari</b> lookback</div>
+            </div>""", unsafe_allow_html=True)
+    with pcol2:
+        st.markdown(f"""<div style="background:{CARD};border:1px solid {BORDER};
+            border-radius:12px;padding:16px 18px;margin-bottom:8px;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.65rem;
+                color:{GOLD};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+                📅 Hari Prediksi</div>""", unsafe_allow_html=True)
+        forecast_days = st.slider("Hari Prediksi", 7, 180, 30, label_visibility="collapsed")
+        st.markdown(f"""<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;
+            color:{TEXTD};">Nilai: <b style="color:{TEXT};">{forecast_days} hari</b> ke depan</div>
+            </div>""", unsafe_allow_html=True)
+    with pcol3:
+        st.markdown(f"""<div style="background:{CARD};border:1px solid {BORDER};
+            border-radius:12px;padding:16px 18px;margin-bottom:8px;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.65rem;
+                color:{GOLD};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+                🔁 Max Epoch</div>""", unsafe_allow_html=True)
+        epochs = st.slider("Max Epoch", 30, 200, 100, 10, label_visibility="collapsed")
+        st.markdown(f"""<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;
+            color:{TEXTD};">Nilai: <b style="color:{TEXT};">{epochs} epoch</b> maksimal</div>
+            </div>""", unsafe_allow_html=True)
+    with pcol4:
+        st.markdown(f"""<div style="background:{CARD};border:1px solid {BORDER};
+            border-radius:12px;padding:16px 18px;margin-bottom:8px;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.65rem;
+                color:{GOLD};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+                📦 Batch Size & Model</div>""", unsafe_allow_html=True)
+        batch_size = st.selectbox("Batch Size", [8,16,32], index=1, label_visibility="collapsed")
+        mc1, mc2 = st.columns(2)
+        run_lstm = mc1.checkbox("BI-LSTM", value=True)
+        run_gru  = mc2.checkbox("BI-GRU",  value=True)
+        st.markdown(f"""<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;
+            color:{TEXTD};">Batch: <b style="color:{TEXT};">{batch_size}</b></div>
+            </div>""", unsafe_allow_html=True)
+
+st.markdown("<div style='margin:4px 0 0 0;'>", unsafe_allow_html=True)
+train_btn = st.button("⚡ Mulai Training — Klik di Sini", type="primary", use_container_width=True)
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════
 # TABS
 # ═══════════════════════════════════════════════════════════════════════════
 tab1,tab2,tab3,tab4,tab5 = st.tabs([
@@ -870,40 +923,43 @@ with tab1:
 
     st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
 
-    col_l,col_r = st.columns([1.2,1])
-    with col_l:
-        st.markdown('<div class="sec-eyebrow">Statistik</div>', unsafe_allow_html=True)
-        st.markdown('<div class="sec-title">Ringkasan Deskriptif</div>', unsafe_allow_html=True)
-        COMMODITY_ICONS2 = {"Gold":"🥇","Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵",
-                            "Tembaga":"🟠","Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
-        desc = df_model[FEAT_AVAIL].describe().T.round(2).rename(
-            columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
-                     "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"})
-        stat_rows = []
-        for var in desc.index:
-            r = desc.loc[var]
-            icon = COMMODITY_ICONS2.get(var, "📊")
-            stat_rows.append([
-                (icon + " " + var, "#fde99a"),
-                (str(int(r["N"])), "#7a8aaa"),
-                ("%.2f" % r["Mean"], "#e8edf8"),
-                ("%.2f" % r["Std"], "#c0cfe0"),
-                ("%.2f" % r["Min"], "#f05060"),
-                ("%.2f" % r["Q1"], "#7a8aaa"),
-                ("%.2f" % r["Median"], "#f0c050"),
-                ("%.2f" % r["Q3"], "#7a8aaa"),
-                ("%.2f" % r["Max"], "#2ec99a"),
-            ])
-        st.markdown(styled_table(
-            ["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"],
-            stat_rows, max_height=320
-        ), unsafe_allow_html=True)
+    # ── ROW 1: Statistik Deskriptif full width ──────────────────────────────
+    st.markdown('<div class="sec-eyebrow">Statistik</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">Ringkasan Deskriptif</div>', unsafe_allow_html=True)
+    COMMODITY_ICONS2 = {"Gold":"🥇","Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵",
+                        "Tembaga":"🟠","Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
+    desc = df_model[FEAT_AVAIL].describe().T.round(2).rename(
+        columns={"count":"N","mean":"Mean","std":"Std","min":"Min",
+                 "25%":"Q1","50%":"Median","75%":"Q3","max":"Max"})
+    stat_rows = []
+    for var in desc.index:
+        r = desc.loc[var]
+        icon = COMMODITY_ICONS2.get(var, "📊")
+        stat_rows.append([
+            (icon + " " + var, "#fde99a"),
+            (str(int(r["N"])), "#7a8aaa"),
+            ("%.2f" % r["Mean"], "#e8edf8"),
+            ("%.2f" % r["Std"], "#c0cfe0"),
+            ("%.2f" % r["Min"], "#f05060"),
+            ("%.2f" % r["Q1"], "#7a8aaa"),
+            ("%.2f" % r["Median"], "#f0c050"),
+            ("%.2f" % r["Q3"], "#7a8aaa"),
+            ("%.2f" % r["Max"], "#2ec99a"),
+        ])
+    st.markdown(styled_table(
+        ["Variabel","N","Mean","Std","Min","Q1","Median","Q3","Max"],
+        stat_rows, max_height=300
+    ), unsafe_allow_html=True)
 
-    with col_r:
+    st.markdown('<div class="gold-divider"></div>', unsafe_allow_html=True)
+
+    # ── ROW 2: Korelasi (kiri) + Distribusi Harga Emas (kanan) ──────────────
+    col_l, col_r = st.columns(2)
+    with col_l:
         st.markdown('<div class="sec-eyebrow">Korelasi</div>', unsafe_allow_html=True)
         st.markdown('<div class="sec-title">Hubungan terhadap Gold</div>', unsafe_allow_html=True)
         corr = df_model[FEAT_AVAIL].corr()["Gold"].drop("Gold").sort_values(ascending=False)
-        fig3, ax3 = plt.subplots(figsize=(5.5,4))
+        fig3, ax3 = plt.subplots(figsize=(6,4))
         cb = [EMERALD if v>=0 else RUBY for v in corr.values]
         bars3 = ax3.barh(corr.index[::-1], corr.values[::-1],
                          color=cb[::-1], alpha=0.82, height=0.55, zorder=3)
@@ -918,7 +974,6 @@ with tab1:
         ax3.set_title("Korelasi Pearson terhadap Gold"); ax3.grid(True,axis="x",alpha=0.18)
         plt.tight_layout(); st.pyplot(fig3); plt.close(fig3)
 
-        # Correlation strength table — styled
         COMMODITY_ICONS = {"Batu Bara":"⚫","Nikel":"🔩","USD Index":"💵","Tembaga":"🟠",
                            "Inflasi Global":"📈","Bitcoin":"₿","Perak":"🥈","Crude Oil":"🛢️"}
         corr_rows = []
@@ -938,9 +993,72 @@ with tab1:
                 (arah, bar_color),
             ])
         st.markdown(styled_table(
-            ["Variabel", "r", "Visual", "Kekuatan", "Arah"],
+            ["Variabel","r","Visual","Kekuatan","Arah"],
             corr_rows, max_height=280
         ), unsafe_allow_html=True)
+
+    with col_r:
+        st.markdown('<div class="sec-eyebrow">Distribusi</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sec-title">Distribusi & Volatilitas</div>', unsafe_allow_html=True)
+
+        # Histogram distribusi harga emas
+        fig_dist, (ax_hist, ax_vol) = plt.subplots(2, 1, figsize=(6, 4.2),
+                                                     gridspec_kw={"hspace": 0.42})
+        # Histogram
+        gold_vals_all = df_model["Gold"].values
+        n_bins = 30
+        n, bins, patches = ax_hist.hist(gold_vals_all, bins=n_bins, color=GOLD, alpha=0.75, edgecolor=CARD, linewidth=0.4)
+        # Color bins by value range
+        norm_vals = (bins[:-1] - bins[:-1].min()) / (bins[:-1].max() - bins[:-1].min() + 1e-9)
+        for patch, nv in zip(patches, norm_vals):
+            patch.set_facecolor(plt.cm.YlOrRd(0.3 + nv * 0.6))
+        # Mean & median lines
+        mean_g = gold_vals_all.mean(); med_g = float(np.median(gold_vals_all))
+        ax_hist.axvline(mean_g, color=EMERALD, linewidth=1.5, linestyle="--", label=f"Mean ${mean_g:,.0f}")
+        ax_hist.axvline(med_g,  color=RUBY,    linewidth=1.5, linestyle=":",  label=f"Median ${med_g:,.0f}")
+        ax_hist.set_title("Distribusi Harga Emas (USD)", fontsize=9.5)
+        ax_hist.set_xlabel("Harga (USD)"); ax_hist.set_ylabel("Frekuensi")
+        ax_hist.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x,_: f"${x:,.0f}"))
+        ax_hist.legend(fontsize=7.5, facecolor=CARD, edgecolor=BORDER, labelcolor=TEXT)
+        ax_hist.grid(True, alpha=0.18)
+
+        # Rolling volatility 30-day
+        roll_vol = df_model["Gold_Return"].rolling(30).std() * 100
+        ax_vol.fill_between(df_model["Tanggal"].values, roll_vol.values,
+                            alpha=0.55, color=RUBY)
+        ax_vol.plot(df_model["Tanggal"].values, roll_vol.values,
+                    color=RUBY, linewidth=1.2)
+        ax_vol.set_title("Volatilitas Rolling 30-Hari (%)", fontsize=9.5)
+        ax_vol.set_ylabel("Volatilitas (%)"); ax_vol.grid(True, alpha=0.18)
+        ax_vol.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x,_: f"{x:.2f}%"))
+        fig_dist.autofmt_xdate(rotation=20)
+        plt.tight_layout(); st.pyplot(fig_dist); plt.close(fig_dist)
+
+        # Mini stats cards bawah
+        vol_cur  = float(roll_vol.dropna().iloc[-1])
+        vol_max  = float(roll_vol.dropna().max())
+        skewness = float(df_model["Gold"].skew())
+        kurtosis = float(df_model["Gold"].kurt())
+        st.markdown(f"""
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Volatilitas Saat Ini</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{RUBY};font-weight:700;margin-top:4px;">{vol_cur:.2f}%</div>
+          </div>
+          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Volatilitas Tertinggi</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{GOLD};font-weight:700;margin-top:4px;">{vol_max:.2f}%</div>
+          </div>
+          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Skewness</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{TEXTD};font-weight:700;margin-top:4px;">{skewness:+.3f}</div>
+          </div>
+          <div style="background:{CARD};border:1px solid {BORDER};border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{MUTED};text-transform:uppercase;letter-spacing:0.1em;">Kurtosis</div>
+            <div style="font-family:JetBrains Mono,monospace;font-size:1.1rem;color:{TEXTD};font-weight:700;margin-top:4px;">{kurtosis:+.3f}</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PREPROCESSING
